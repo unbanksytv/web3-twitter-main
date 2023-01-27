@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/TweetContract.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity ^0.8.9;\r\n\r\ncontract TweetContract {\r\n    event AddTweet(address recipient, uint tweetId);\r\n    event DeleteTweet(uint tweetId, bool isDeleted);\r\n\r\n    struct Tweet {\r\n        uint id;\r\n        address username;\r\n        string tweetText;\r\n        bool isDeleted;\r\n    }\r\n\r\n    Tweet[] private tweets;\r\n\r\n    // Mapping of Tweet id to the wallet address of the user\r\n    mapping(uint256 => address) private tweetToOwner;\r\n\r\n    // Method to be called by our frontend when trying to add a new Tweet\r\n    function addTweet(string memory tweetText, bool isDeleted) external {\r\n        uint tweetId = tweets.length;\r\n        tweets.push(Tweet(tweetId, msg.sender, tweetText, isDeleted));\r\n        tweetToOwner[tweetId] = msg.sender;\r\n        emit AddTweet(msg.sender, tweetId);\r\n    }\r\n\r\n    // Method to get all the Tweets\r\n    function getAllTweets() external view returns (Tweet[] memory) {\r\n        Tweet[] memory temporary = new Tweet[](tweets.length);\r\n        uint counter = 0;\r\n        for (uint i = 0; i < tweets.length; i++) {\r\n            if (tweets[i].isDeleted == false) {\r\n                temporary[counter] = tweets[i];\r\n                counter++;\r\n            }\r\n        }\r\n\r\n        Tweet[] memory result = new Tweet[](counter);\r\n        for (uint i = 0; i < counter; i++) {\r\n            result[i] = temporary[i];\r\n        }\r\n        return result;\r\n    }\r\n\r\n    // Method to get only your Tweets\r\n    function getMyTweets() external view returns (Tweet[] memory) {\r\n        Tweet[] memory temporary = new Tweet[](tweets.length);\r\n        uint counter = 0;\r\n        for (uint i = 0; i < tweets.length; i++) {\r\n            if (tweetToOwner[i] == msg.sender && tweets[i].isDeleted == false) {\r\n                temporary[counter] = tweets[i];\r\n                counter++;\r\n            }\r\n        }\r\n\r\n        Tweet[] memory result = new Tweet[](counter);\r\n        for (uint i = 0; i < counter; i++) {\r\n            result[i] = temporary[i];\r\n        }\r\n        return result;\r\n    }\r\n\r\n    // Method to Delete a Tweet\r\n    function deleteTweet(uint tweetId, bool isDeleted) external {\r\n        if (tweetToOwner[tweetId] == msg.sender) {\r\n            tweets[tweetId].isDeleted = isDeleted;\r\n            emit DeleteTweet(tweetId, isDeleted);\r\n        }\r\n    }\r\n}\r\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
